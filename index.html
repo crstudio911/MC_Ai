@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <title> MC_Ai </title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="one.css">
+</head>
+<body>
+
+<div class="progress-bar" id="progress-bar"></div>
+
+<nav class="topbar" id="topbar">
+  <div class="brand">
+    <img src="img/logo.png" alt="MC_Ai" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'brand-fallback',innerHTML:'<i class=\'fa-solid fa-bolt\'></i>'}))">
+    <span>MC_Ai</span>
+  </div>
+  <a href="main/main.html" class="nav-cta">ابدأ الاستخدام</a>
+</nav>
+
+<header class="hero">
+  <div class="hero-grid wrap">
+    <div class="hero-text">
+      <p class="kicker">اشتراكات موثوقة من غير وسطاء</p>
+      <h1>اشتراكك بيوصلك في دقايق<br>وسعرك يفضل زي ما اتفقنا</h1>
+      <p class="sub">بنبيعلك اشتراكات منصات الذكاء الاصطناعي والمنصات العامة بأسعار مصرية حقيقية، وبنفضل معاك لحد ما الاشتراك يشتغل صح.</p>
+      <div class="hero-actions">
+        <a href="main/main.html" class="cta-primary" id="cta-magnetic">شوف الأسعار</a>
+        <div class="discount-tag"><i class="fa-solid fa-scissors"></i> خصم 50% على أول اشتراك</div>
+      </div>
+      <ul class="trust-row">
+        <li><i class="fa-solid fa-bolt"></i> تفعيل سريع</li>
+        <li><i class="fa-solid fa-headset"></i> دعم واتساب</li>
+        <li><i class="fa-solid fa-building-columns"></i> دفع محلي</li>
+      </ul>
+    </div>
+
+    <div class="hero-visual">
+      <div class="ai-core" id="ai-core">
+        <div class="ai-core-glow"></div>
+        <svg class="ai-core-ring" viewBox="0 0 300 300" aria-hidden="true">
+          <defs>
+            <linearGradient id="ringGrad" x1="10%" y1="0%" x2="90%" y2="100%">
+              <stop offset="0%" class="ring-stop-a"></stop>
+              <stop offset="55%" class="ring-stop-b"></stop>
+              <stop offset="100%" class="ring-stop-c"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="150" cy="150" r="126" fill="none" stroke="url(#ringGrad)" stroke-width="3" stroke-linecap="round" stroke-dasharray="700 104" transform="rotate(120 150 150)"></circle>
+        </svg>
+        <div class="ai-core-orbit orbit-a"><span class="ai-core-dot"></span></div>
+        <div class="ai-core-orbit orbit-b"><span class="ai-core-dot dot-b"></span></div>
+        <div class="ai-core-icon"><i class="fa-solid fa-brain"></i></div>
+        <div class="ai-core-badge"><i class="fa-solid fa-bolt"></i> تفعيل فوري</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue"><i class="fa-solid fa-chevron-down"></i></div>
+</header>
+
+<section class="reviews" id="reviews">
+  <div class="section-divider"></div>
+  <div class="wrap section-head">
+    <h2>عملاء اشتروا وأكدوا</h2>
+    <p>مش احنا اللي بنقولها، عملاؤنا هما اللي بيقولوها</p>
+  </div>
+  <div class="marquee-row right" id="row-right"></div>
+  <div class="marquee-row left" id="row-left"></div>
+</section>
+
+<section id="faq">
+  <div class="section-divider"></div>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>أسئلة بتتكرر علينا كتير</h2>
+    </div>
+    <div class="faq-list" id="faq-list"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="img/logo.png" alt="MC_Ai" onerror="this.style.display='none'">
+      <span>MC_Ai</span>
+    </div>
+    <p class="footer-credit">برمجة وتصميم هذا الموقع بواسطة <a href="https://crstudio911.github.io/MC/" target="_blank" rel="noopener">MC</a></p>
+  </div>
+  <p class="footer-bottom">© MC_Ai — All rights reserved</p>
+</footer>
+
+<script src="one.js"></script>
+</body>
+</html>

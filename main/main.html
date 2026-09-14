@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<title>MC_Ai</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#050608">
+<link rel="icon" type="image/png" href="../img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a class="brand" href="../index.html">
+    <img src="../img/logo.png" alt="MC_Ai" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'brand-fallback',innerHTML:'<i class=\'fa-solid fa-bolt\'></i>'}))">
+    <span>MC_Ai</span>
+  </a>
+  <a class="nav-support" href="https://wa.me/201274277202" target="_blank" rel="noopener">
+    <i class="fa-solid fa-headset"></i> الدعم الفني
+  </a>
+</nav>
+
+<main class="catalog-page">
+  <div class="wrap catalog-head">
+    <p class="kicker">المتجر</p>
+    <h1>اختار الباقة اللي تناسبك</h1>
+    <p class="sub">كل الأسعار بالجنيه المصري، والتفعيل بيتم بعد تأكيد التحويل مباشرة</p>
+  </div>
+  <div class="wrap catalog-status hidden" id="catalog-status">
+    <i class="fa-solid fa-circle-exclamation"></i> تعذر التحميل
+  </div>
+  <div class="wrap catalog-grid" id="catalog-grid"></div>
+</main>
+
+<div class="flow-overlay" id="flow-overlay">
+  <div class="flow-modal" role="dialog" aria-modal="true" aria-label="إتمام الطلب">
+    <button class="flow-close" id="flow-close" aria-label="اغلاق"><i class="fa-solid fa-xmark"></i></button>
+
+    <div class="flow-steps" id="flow-steps">
+      <div class="flow-steps-track"><div class="flow-steps-fill" id="flow-steps-fill"></div></div>
+      <span class="flow-step-dot active" data-step="detail"><i class="flow-step-num">1</i><em>الباقة</em></span>
+      <span class="flow-step-dot" data-step="payment"><i class="flow-step-num">2</i><em>الدفع</em></span>
+      <span class="flow-step-dot" data-step="customer"><i class="flow-step-num">3</i><em>بياناتك</em></span>
+      <span class="flow-step-dot" data-step="invoice"><i class="flow-step-num">4</i><em>الفاتورة</em></span>
+    </div>
+
+    <section class="flow-panel active" data-panel="detail">
+      <div class="detail-banner" id="detail-banner">
+        <img id="detail-banner-img" src="" alt="">
+        <div class="detail-banner-shade"></div>
+        <h2 id="detail-title"></h2>
+      </div>
+      <div class="detail-body">
+        <div class="variant-list" id="variant-list" role="radiogroup" aria-label="اختار الباقة"></div>
+        <div class="info-blocks" id="info-blocks"></div>
+        <div class="lovable-extra" id="lovable-extra"></div>
+      </div>
+      <div class="flow-footer">
+        <div class="flow-price" id="detail-price"></div>
+        <button class="btn-primary" id="to-payment-btn">اطلب الباقة دي</button>
+      </div>
+    </section>
+
+    <section class="flow-panel" data-panel="payment">
+      <div class="panel-scroll">
+        <div class="order-summary" id="order-summary"></div>
+
+        <div class="coupon-row">
+          <input type="text" id="coupon-input" placeholder="عندك كود خصم؟ اكتبه هنا">
+          <button class="btn-ghost" id="coupon-apply">تطبيق</button>
+        </div>
+        <p class="coupon-msg" id="coupon-msg" aria-live="polite"></p>
+
+        <div class="total-row">
+          <span>المبلغ المطلوب تحويله</span>
+          <strong id="total-amount"></strong>
+        </div>
+
+        <div class="pay-methods" id="pay-methods">
+          <button class="pay-tab active" data-method="instapay"><i class="fa-solid fa-mobile-screen"></i> انستا باي</button>
+          <button class="pay-tab" data-method="telda"><i class="fa-solid fa-credit-card"></i> تيلدا</button>
+          <button class="pay-tab" data-method="fawry"><i class="fa-solid fa-store"></i> فوري</button>
+          <button class="pay-tab" data-method="bank"><i class="fa-solid fa-building-columns"></i> تحويل بنكي</button>
+        </div>
+
+        <div class="pay-detail" id="pay-detail"></div>
+
+        <div class="warning-box">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>احتفظ بسكرين شاشة التحويل، ده مهم جدًا لإتمام طلبك</span>
+        </div>
+
+        <label class="check-row">
+          <input type="checkbox" id="transfer-confirm">
+          <span>حولت المبلغ واحتفظت بسكرين التحويل</span>
+        </label>
+      </div>
+      <div class="flow-footer">
+        <button class="btn-secondary" data-back="detail">رجوع</button>
+        <button class="btn-primary" id="to-customer-btn" disabled>كملت التحويل</button>
+      </div>
+    </section>
+
+    <section class="flow-panel" data-panel="customer">
+      <div class="panel-scroll">
+        <div class="field-group" id="name-field">
+          <label for="customer-name">اسم العميل</label>
+          <input type="text" id="customer-name" placeholder="اكتب اسمك بالكامل" autocomplete="name">
+          <span class="field-hint" id="name-hint"></span>
+        </div>
+        <div class="field-group" id="phone-field">
+          <label for="customer-phone">رقم الهاتف</label>
+          <input type="tel" id="customer-phone" placeholder="01xxxxxxxxx" inputmode="tel" autocomplete="tel" maxlength="11">
+          <span class="field-hint" id="phone-hint"></span>
+        </div>
+        <div class="agreement-box">
+          <label class="check-row">
+            <input type="checkbox" id="agree-check">
+            <span>بمجرد استخراج هذه الفاتورة، فإنك توافق على سياسة الاسترجاع الخاصة بالباقة المرادة وعلى شروط استخدامها</span>
+          </label>
+        </div>
+        <p class="field-error" id="customer-error" aria-live="polite"></p>
+      </div>
+      <div class="flow-footer">
+        <button class="btn-secondary" data-back="payment">رجوع</button>
+        <button class="btn-primary" id="to-invoice-btn" disabled>استخراج الفاتورة</button>
+      </div>
+    </section>
+
+    <section class="flow-panel" data-panel="invoice">
+      <div class="panel-scroll">
+        <div class="invoice-card" id="invoice-card">
+          <div class="invoice-top">
+            <div class="invoice-brand">
+              <img src="../img/logo.png" alt="MC_Ai">
+              <span>MC_Ai</span>
+            </div>
+            <div class="invoice-meta">
+              <p id="invoice-id"></p>
+              <p id="invoice-date"></p>
+            </div>
+          </div>
+          <div class="invoice-section">
+            <p class="invoice-label">بيانات العميل</p>
+            <p id="invoice-customer"></p>
+          </div>
+          <div class="invoice-section">
+            <p class="invoice-label">الباقة</p>
+            <p id="invoice-product"></p>
+          </div>
+          <div class="invoice-price-table" id="invoice-price-table"></div>
+          <div class="invoice-section">
+            <p class="invoice-label">سياسة الاسترجاع</p>
+            <p id="invoice-back"></p>
+          </div>
+          <div class="invoice-footer">شكرًا لثقتك في MC_Ai</div>
+        </div>
+      </div>
+      <div class="flow-footer invoice-actions">
+        <button class="btn-secondary" id="download-invoice-btn"><i class="fa-solid fa-download"></i> تحميل الفاتورة</button>
+        <button class="btn-primary" id="send-whatsapp-btn"><i class="fa-brands fa-whatsapp"></i> إرسال للدعم عبر واتساب</button>
+      </div>
+      <button class="new-order-link" id="new-order-btn">طلب باقة تانية</button>
+    </section>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
