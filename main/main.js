@@ -5,7 +5,8 @@ const PRODUCT_CONFIG = {
   "gpt": { title: "ChatGPT", cardImage: "../img/gpt.png", bannerImage: "../img/gpt.png" },
   "cup": { title: "Capcut Pro Ai", cardImage: "../img/cup.png", bannerImage: "../img/cup.png" },
   "can": { title: "Canva Pro", cardImage: "../img/can.png", bannerImage: "../img/can.png" },
-  "Lovable EX": { title: "Lovable", cardImage: "../img/lova.png", bannerImage: "../img/lova.png" }
+  "Lovable EX": { title: "Lovable", cardImage: "../img/lova.png", bannerImage: "../img/lova.png" },
+  "win": { title: "Activate Windows", cardImage: "../img/win.png", bannerImage: "../img/win.png" }
 };
 
 const PAYMENT_CONFIG = {
