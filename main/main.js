@@ -613,7 +613,7 @@ function bindEvents() {
   });
 
   document.getElementById("download-invoice-btn").addEventListener("click", () => {
-    html2canvas(document.getElementById("invoice-card"), { backgroundColor: "#0b0e14" }).then(canvas => {
+    html2canvas(document.getElementById("invoice-card"), { backgroundColor: "#0b0e14", scale: 2, useCORS: true }).then(canvas => {
       const link = document.createElement("a");
       link.download = (window.__lastInvoice ? window.__lastInvoice.id : "invoice") + ".png";
       link.href = canvas.toDataURL("image/png");

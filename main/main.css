@@ -987,7 +987,15 @@ nav.topbar{
 
 .invoice-section{margin-top:18px;}
 
-.invoice-label{font-size:.74rem;font-weight:800;color:var(--azure-300);margin-bottom:6px;letter-spacing:.03em;text-transform:uppercase;}
+.invoice-label{
+  font-size:.82rem;
+  font-weight:700;
+  color:var(--azure-300);
+  margin-bottom:6px;
+  font-family:'Almarai',sans-serif;
+  letter-spacing:normal;
+  text-transform:none;
+}
 
 .invoice-section p{font-size:.9rem;color:var(--chrome-300);line-height:1.8;}
 
