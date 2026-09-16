@@ -45,15 +45,30 @@ function reviewCard(r) {
   `;
   return card;
 }
+console.log(
+  "%c  MC_Ai  ",
+  "color:#6cc4ff;font-weight:900;font-size:2.2rem;background:#050608;padding:10px 24px;border-radius:10px;border:2px solid #2f8fe0;letter-spacing:5px;"
+);
 function buildMarquee() {
   const rowRight = document.getElementById("row-right");
-  const rowLeft = document.getElementById("row-left");
+  const rowLeft  = document.getElementById("row-left");
   if (!rowRight || !rowLeft) return;
-  const half = Math.ceil(reviews.length / 2);
-  const setA = reviews.slice(0, half);
-  const setB = reviews.slice(half);
-  [setA, setA].forEach(set => set.forEach(r => rowRight.appendChild(reviewCard(r))));
-  [setB, setB].forEach(set => set.forEach(r => rowLeft.appendChild(reviewCard(r))));
+  const count    = reviews.length;
+  const rowCount = Math.min(Math.max(1, Math.ceil(count / 3)), 3);
+  const fill     = [...reviews, ...reviews];
+  fill.forEach(r => rowRight.appendChild(reviewCard(r)));
+  if (rowCount >= 2) {
+    fill.forEach(r => rowLeft.appendChild(reviewCard(r)));
+  } else {
+    rowLeft.style.display = "none";
+  }
+  if (rowCount >= 3) {
+    const rowExtra = document.createElement("div");
+    rowExtra.className = "marquee-row right";
+    rowExtra.style.marginTop = "20px";
+    fill.forEach(r => rowExtra.appendChild(reviewCard(r)));
+    rowLeft.insertAdjacentElement("afterend", rowExtra);
+  }
 }
 function buildFaq() {
   const list = document.getElementById("faq-list");

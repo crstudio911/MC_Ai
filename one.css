@@ -400,13 +400,13 @@ section{padding:120px 0;position:relative;}
 .reviews::before{right:0;background:linear-gradient(to left,var(--void),transparent);}
 .reviews::after{left:0;background:linear-gradient(to right,var(--void),transparent);}
 
-.marquee-row{display:flex;gap:20px;width:max-content;}
-.marquee-row.right{animation:scrollRight 50s linear infinite;margin-bottom:20px;}
-.marquee-row.left{animation:scrollLeft 50s linear infinite;}
+.marquee-row{display:flex;gap:20px;width:max-content;will-change:transform;}
+.marquee-row.right{animation:marqFwd 38s linear infinite;margin-bottom:20px;}
+.marquee-row.left{animation:marqBwd 46s linear infinite;}
 .reviews:hover .marquee-row{animation-play-state:paused;}
 
-@keyframes scrollRight{from{transform:translateX(0);}to{transform:translateX(50%);}}
-@keyframes scrollLeft{from{transform:translateX(-50%);}to{transform:translateX(0);}}
+@keyframes marqFwd{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+@keyframes marqBwd{0%{transform:translateX(-50%);}100%{transform:translateX(0);}}
 
 .review-card{
   flex:0 0 auto;

@@ -632,6 +632,10 @@ function bindEvents() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  console.log(
+    "%c  MC_Ai  ",
+    "color:#6cc4ff;font-weight:900;font-size:2.2rem;background:#050608;padding:10px 24px;border-radius:10px;border:2px solid #2f8fe0;letter-spacing:5px;"
+  );
   bindEvents();
   renderSkeleton(6);
   fetch(DATA_URL)
