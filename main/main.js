@@ -2,12 +2,13 @@ const DATA_URL = "https://script.google.com/macros/s/AKfycbwisIG5MrtXFguYQHXQ8Fr
 
 const PRODUCT_CONFIG = {
   "gimi": { title: "Google Ai Pro", cardImage: "../img/gimi.png", bannerImage: "../img/gimi.png" },
+	"clu": { title: "Claude", cardImage: "../img/clu.png", bannerImage: "../img/clu.png" },
   "gpt": { title: "ChatGPT", cardImage: "../img/gpt.png", bannerImage: "../img/gpt.png" },
   "cup": { title: "Capcut Pro Ai", cardImage: "../img/cup.png", bannerImage: "../img/cup.png" },
   "can": { title: "Canva Pro", cardImage: "../img/can.png", bannerImage: "../img/can.png" },
   "Lovable EX": { title: "Lovable", cardImage: "../img/lova.png", bannerImage: "../img/lova.png" },
-  "win": { title: "Activate Windows", cardImage: "../img/win.png", bannerImage: "../img/win.png" },
-   "clu": { title: "Claude", cardImage: "../img/clu.png", bannerImage: "../img/clu.png" }
+  "win": { title: "Activate Windows", cardImage: "../img/win.png", bannerImage: "../img/win.png" }
+   
 };
 
 const PAYMENT_CONFIG = {
