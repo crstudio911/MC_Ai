@@ -150,9 +150,26 @@ nav.topbar{
 .hero-text{max-width:560px;}
 
 .kicker{
-  font-size:.92rem;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:.86rem;
   font-weight:700;
   color:var(--azure-300);
+  padding:7px 16px;
+  border-radius:999px;
+  border:1px solid rgba(108,196,255,.25);
+  background:rgba(47,143,224,.07);
+}
+
+.kicker::before{
+  content:'';
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--azure-300);
+  box-shadow:0 0 8px 2px rgba(108,196,255,.7);
+  flex:none;
 }
 
 .hero h1{
@@ -220,33 +237,43 @@ nav.topbar{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  font-size:.86rem;
+  font-size:.82rem;
   font-weight:700;
   color:var(--chrome-300);
+  padding:9px 16px;
+  border-radius:999px;
+  border:1px dashed rgba(108,196,255,.3);
 }
 
-.discount-tag i{font-size:.78rem;color:var(--azure-300);}
+.discount-tag i{font-size:.76rem;color:var(--azure-300);}
 
 .trust-row{
   list-style:none;
   display:flex;
-  gap:22px;
+  gap:12px;
   margin-top:34px;
   flex-wrap:wrap;
   border-top:1px dashed var(--void-line);
-  padding-top:22px;
+  padding-top:24px;
 }
 
 .trust-row li{
   display:flex;
   align-items:center;
   gap:9px;
-  font-size:.86rem;
+  font-size:.84rem;
   color:var(--text-soft);
   font-weight:400;
+  padding:9px 16px;
+  border-radius:999px;
+  border:1px solid var(--void-line);
+  background:rgba(238,241,245,.02);
+  transition:border-color .3s var(--ease),background .3s var(--ease);
 }
 
-.trust-row i{color:var(--azure-300);font-size:.85rem;}
+.trust-row li:hover{border-color:rgba(108,196,255,.25);background:rgba(47,143,224,.05);}
+
+.trust-row i{color:var(--azure-300);font-size:.82rem;}
 
 .hero-visual{display:flex;align-items:center;justify-content:center;perspective:900px;}
 
@@ -320,6 +347,17 @@ nav.topbar{
   align-items:center;
   justify-content:center;
   z-index:3;
+}
+
+.ai-core-icon::before{
+  content:'';
+  position:absolute;
+  width:156px;
+  height:156px;
+  border-radius:50%;
+  background:rgba(11,14,20,.55);
+  border:1px solid rgba(108,196,255,.16);
+  backdrop-filter:blur(6px);
 }
 
 .ai-core-icon i{
@@ -526,7 +564,6 @@ footer{border-top:1px solid var(--void-line);padding:48px 0 30px;position:relati
   .hero h1{opacity:1;transform:none;}
 }
 
-/* ─── MC Channel Button ─────────────────────────────── */
 .mc-channel-row{
   margin-top:16px;
 }
@@ -564,7 +601,6 @@ footer{border-top:1px solid var(--void-line);padding:48px 0 30px;position:relati
   outline-offset:3px;
 }
 
-/* ─── Monetag Native Banner ─────────────────────────── */
 .mc-native-ad{
   padding:40px 0;
   position:relative;

@@ -1,13 +1,13 @@
 const DATA_URL = "https://script.google.com/macros/s/AKfycbwisIG5MrtXFguYQHXQ8FrmrnC5HtPRAdLt_uC454Pbm9adNh8fykmFoquCERT0yIIx/exec";
 
 const PRODUCT_CONFIG = {
-  "gimi": { title: "Google Ai Pro", cardImage: "../img/gimi.png", bannerImage: "../img/gimi.png" },
-	"clu": { title: "Claude", cardImage: "../img/clu.png", bannerImage: "../img/clu.png" },
-  "gpt": { title: "ChatGPT", cardImage: "../img/gpt.png", bannerImage: "../img/gpt.png" },
-  "cup": { title: "Capcut Pro Ai", cardImage: "../img/cup.png", bannerImage: "../img/cup.png" },
-  "can": { title: "Canva Pro", cardImage: "../img/can.png", bannerImage: "../img/can.png" },
-  "Lovable EX": { title: "Lovable", cardImage: "../img/lova.png", bannerImage: "../img/lova.png" },
-  "win": { title: "Activate Windows", cardImage: "../img/win.png", bannerImage: "../img/win.png" }
+  "gimi": { title: "Google Ai Pro", cardImage: "../img/gimi.png", bannerImage: "../img/Bgimi.png" },
+   "clu": { title: "Claude", cardImage: "../img/col.png", bannerImage: "../img/Bcol.png" },
+  "gpt": { title: "ChatGPT", cardImage: "../img/gpt.png", bannerImage: "../img/Bgpt.png" },
+  "cup": { title: "Capcut Pro Ai", cardImage: "../img/cup.png", bannerImage: "../img/Bcup.png" },
+  "can": { title: "Canva Pro", cardImage: "../img/can.png", bannerImage: "../img/Bcan.png" },
+  "Lovable EX": { title: "Lovable", cardImage: "../img/lov.png", bannerImage: "../img/Blov.png" },
+  "win": { title: "Activate Windows", cardImage: "../img/win.png", bannerImage: "../img/Bwin.png" }
    
 };
 
@@ -125,10 +125,16 @@ function renderCatalog() {
     card.setAttribute("aria-label", meta.title);
     card.style.animationDelay = Math.min(i * 60, 400) + "ms";
     card.innerHTML = `
-      <div class="product-card-img"><img src="${meta.cardImage}" alt="${escapeHtml(meta.title)}" loading="lazy" onerror="this.style.opacity='0'"></div>
+      <div class="product-card-media">
+        <img src="${meta.cardImage}" alt="${escapeHtml(meta.title)}" loading="lazy" onerror="this.style.opacity='0'">
+        <div class="product-card-shade"></div>
+      </div>
       <div class="product-card-body">
         <h3>${escapeHtml(meta.title)}</h3>
-        <div class="product-card-price">${min !== null ? "يبدأ من " + formatEGP(min) : ""}</div>
+        <div class="product-card-footer">
+          <span class="product-card-price">${min !== null ? "يبدأ من " + formatEGP(min) : ""}</span>
+          <span class="product-card-cta"><i class="fa-solid fa-arrow-left"></i></span>
+        </div>
       </div>
     `;
     card.addEventListener("click", () => openFlow(product.key));
