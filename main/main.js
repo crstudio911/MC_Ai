@@ -7,8 +7,8 @@ const PRODUCT_CONFIG = {
   "cup": { title: "Capcut Pro Ai", cardImage: "../img/cup.png", bannerImage: "../img/Bcup.png" },
   "can": { title: "Canva Pro", cardImage: "../img/can.png", bannerImage: "../img/Bcan.png" },
   "Lovable EX": { title: "Lovable", cardImage: "../img/lov.png", bannerImage: "../img/Blov.png" },
-  "win": { title: "Activate Windows", cardImage: "../img/win.png", bannerImage: "../img/Bwin.png" }
-   
+  "win": { title: "Activate Windows", cardImage: "../img/win.png", bannerImage: "../img/Bwin.png" },
+   "Lovable_D": { title: "Lovable Download Project", cardImage: "../img/lovD", bannerImage: "../img/BlovD"}
 };
 
 const PAYMENT_CONFIG = {
