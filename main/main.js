@@ -1,14 +1,18 @@
 const DATA_URL = "https://script.google.com/macros/s/AKfycbwisIG5MrtXFguYQHXQ8FrmrnC5HtPRAdLt_uC454Pbm9adNh8fykmFoquCERT0yIIx/exec";
 
 const PRODUCT_CONFIG = {
-  "gimi": { title: "Google Ai Pro", cardImage: "../img/gimi.png", bannerImage: "../img/Bgimi.png" },
-   "clu": { title: "Claude", cardImage: "../img/col.png", bannerImage: "../img/Bcol.png" },
-  "gpt": { title: "ChatGPT", cardImage: "../img/gpt.png", bannerImage: "../img/Bgpt.png" },
-  "cup": { title: "Capcut Pro Ai", cardImage: "../img/cup.png", bannerImage: "../img/Bcup.png" },
-  "can": { title: "Canva Pro", cardImage: "../img/can.png", bannerImage: "../img/Bcan.png" },
-  "Lovable EX": { title: "Lovable", cardImage: "../img/lov.png", bannerImage: "../img/Blov.png" },
-  "win": { title: "Activate Windows", cardImage: "../img/win.png", bannerImage: "../img/Bwin.png" },
-   "Lovable_D": { title: "Lovable Download Project", cardImage: "../img/lovD.png", bannerImage: "../img/BlovD.png"}
+  "Lovable EX": { title: "Lovable", cardImage: "../img/c_lovable.png", bannerImage: "../img/b_lovable.png" },
+  "gimi": { title: "Google Ai Pro", cardImage: "../img/c_gimi.png", bannerImage: "../img/b_gimi.png" },
+  "clu": { title: "Claude", cardImage: "../img/c_clu.png", bannerImage: "../img/b_clu.png" },
+  "gpt": { title: "ChatGPT", cardImage: "../img/c_gpt.png", bannerImage: "../img/b_gpt.png" },
+  "cup": { title: "Capcut Pro Ai", cardImage: "../img/c_cup.png", bannerImage: "../img/b_cup.png" },
+  "can": { title: "Canva Pro", cardImage: "../img/c_can.png", bannerImage: "../img/b_can.png" },
+  "win": { title: "Activate Windows", cardImage: "../img/c_win.png", bannerImage: "../img/b_win.png" },
+  "Lovable_D": { title: "Lovable Download Project", cardImage: "../img/c_lovable_d.png", bannerImage: "../img/b_lovable_d.png"},
+  "adobe": { title: "Adobe express", cardImage: "../img/c_adobe.png", bannerImage: "../img/b_adobe.png"},
+  "micro": { title: "microsoft office 365 plus", cardImage: "../img/c_micro.png", bannerImage: "../img/b_micro.png"},
+  "Wis": { title: "Wispr Flow", cardImage: "../img/c_wis.png", bannerImage: "../img/b_wis.png"},
+  "auto": { title: "Autodesk", cardImage: "../img/c_auto.png", bannerImage: "../img/b_auto.png"},
 };
 
 const PAYMENT_CONFIG = {
@@ -105,47 +109,74 @@ function renderSkeleton(count) {
   }
 }
 
-function renderCatalog() {
+function createProductCard(product, i) {
+  const meta = getProductMeta(product.key);
+  const min = minPriceOf(product);
+  const card = document.createElement("div");
+  card.className = "product-card";
+  card.setAttribute("role", "button");
+  card.setAttribute("tabindex", "0");
+  card.setAttribute("aria-label", meta.title);
+  card.style.animationDelay = "0ms";
+  card.innerHTML = `
+    <div class="product-card-media">
+      <img src="${meta.cardImage}" alt="${escapeHtml(meta.title)}" loading="lazy" onerror="this.style.opacity='0'">
+      <div class="product-card-shade"></div>
+    </div>
+    <div class="product-card-body">
+      <h3>${escapeHtml(meta.title)}</h3>
+      <div class="product-card-footer">
+        <span class="product-card-price">${min !== null ? "يبدأ من " + formatEGP(min) : ""}</span>
+        <span class="product-card-cta"><i class="fa-solid fa-arrow-left"></i></span>
+      </div>
+    </div>
+  `;
+  card.addEventListener("click", () => openFlow(product.key));
+  card.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openFlow(product.key);
+    }
+  });
+  return card;
+}
+
+function renderCatalogStaggered() {
   const grid = document.getElementById("catalog-grid");
   const status = document.getElementById("catalog-status");
-  grid.innerHTML = "";
+
   if (!PRODUCTS.length) {
+    grid.innerHTML = "";
     status.classList.remove("hidden");
     status.innerHTML = "<i class=\"fa-solid fa-circle-exclamation\"></i> مفيش باقات متاحة دلوقتي";
     return;
   }
   status.classList.add("hidden");
-  PRODUCTS.forEach((product, i) => {
-    const meta = getProductMeta(product.key);
-    const min = minPriceOf(product);
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.setAttribute("role", "button");
-    card.setAttribute("tabindex", "0");
-    card.setAttribute("aria-label", meta.title);
-    card.style.animationDelay = Math.min(i * 60, 400) + "ms";
-    card.innerHTML = `
-      <div class="product-card-media">
-        <img src="${meta.cardImage}" alt="${escapeHtml(meta.title)}" loading="lazy" onerror="this.style.opacity='0'">
-        <div class="product-card-shade"></div>
-      </div>
-      <div class="product-card-body">
-        <h3>${escapeHtml(meta.title)}</h3>
-        <div class="product-card-footer">
-          <span class="product-card-price">${min !== null ? "يبدأ من " + formatEGP(min) : ""}</span>
-          <span class="product-card-cta"><i class="fa-solid fa-arrow-left"></i></span>
-        </div>
-      </div>
-    `;
-    card.addEventListener("click", () => openFlow(product.key));
-    card.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openFlow(product.key);
-      }
-    });
-    grid.appendChild(card);
-  });
+
+  const skeletons = Array.from(grid.querySelectorAll(".skeleton-card"));
+  const delay = 80;
+  let i = 0;
+
+  function addNext() {
+    if (i >= PRODUCTS.length) {
+      skeletons.forEach(s => s.remove());
+      return;
+    }
+    const card = createProductCard(PRODUCTS[i], i);
+    if (skeletons[i]) {
+      grid.replaceChild(card, skeletons[i]);
+    } else {
+      grid.appendChild(card);
+    }
+    i++;
+    if (i < PRODUCTS.length) {
+      setTimeout(() => requestAnimationFrame(addNext), delay);
+    } else {
+      skeletons.slice(i).forEach(s => s.remove());
+    }
+  }
+
+  requestAnimationFrame(addNext);
 }
 
 function findProduct(key) {
@@ -650,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(res => res.json())
     .then(json => {
       PRODUCTS = parseData(json);
-      renderCatalog();
+      renderCatalogStaggered();
       restoreState();
     })
     .catch(() => {
