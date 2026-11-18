@@ -154,8 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAiCoreParallax();
 });
 
-//=======================BdaCODE,ElAssist=====================
-
 (function () {
   "use strict";
 
@@ -493,12 +491,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 })();
 
-//===========5LSCODE,ElAssist==============================
-
-
-
 console.log(
-  '%c ⚙ VERSION %c V3.2.4 ',
+  '%c ⚙ VERSION %c V5.2.2 ',
   'background: #0f172a; color: #94a3b8; padding: 8px 12px; border-radius: 8px 0 0 8px; font-family: system-ui, sans-serif; font-weight: 600; font-size: 14px;',
   'background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); color: #ffffff; padding: 8px 16px; border-radius: 0 8px 8px 0; font-family: system-ui, sans-serif; font-weight: 800; font-size: 14px;'
 );

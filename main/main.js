@@ -63,14 +63,55 @@ function toNumber(val) {
   return isNaN(n) ? null : n;
 }
 
+const CACHE_KEY = "site_usd_egp_rate";
+const CACHE_DURATION = 24 * 60 * 60 * 1000;
+let exchangeRate = 50.0;
+
+async function initCurrencyConverter() {
+  const cachedData = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+  if (cachedData && (Date.now() - cachedData.timestamp < CACHE_DURATION) && cachedData.rate) {
+    exchangeRate = cachedData.rate;
+    return exchangeRate;
+  }
+  try {
+    const response = await fetch("https://open.er-api.com/v6/latest/USD");
+    const data = await response.json();
+    if (data && data.rates && data.rates.EGP) {
+      exchangeRate = data.rates.EGP;
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ rate: exchangeRate, timestamp: Date.now() }));
+    }
+  } catch (error) {
+    if (cachedData && cachedData.rate) {
+      exchangeRate = cachedData.rate;
+    } else {
+      exchangeRate = 50.0;
+    }
+  }
+  return exchangeRate;
+}
+
+function formatUSD(n) {
+  return `$${n.toFixed(2)}`;
+}
+
 function formatEGP(n) {
   return `${Math.round(n).toLocaleString("en-US")} ج.م`;
+}
+
+function convertUSDToEGP(usd) {
+  return Math.round(usd * exchangeRate);
+}
+
+function priceWithEGP(usd) {
+  if (usd === null || usd === undefined) return "";
+  const egp = convertUSDToEGP(usd);
+  return `${formatUSD(usd)} <span class="price-egp-hint">(≈ ${formatEGP(egp)})</span>`;
 }
 
 function priceLabel(variant) {
   if (isFree(variant.cash)) return "مجاناً";
   const n = toNumber(variant.cash);
-  return n !== null ? formatEGP(n) : "";
+  return n !== null ? priceWithEGP(n) : "";
 }
 
 function minPriceOf(product) {
@@ -126,7 +167,7 @@ function createProductCard(product, i) {
     <div class="product-card-body">
       <h3>${escapeHtml(meta.title)}</h3>
       <div class="product-card-footer">
-        <span class="product-card-price">${min !== null ? "يبدأ من " + formatEGP(min) : ""}</span>
+        <span class="product-card-price" data-usd="${min !== null ? min : ''}">${min !== null ? "يبدأ من " + priceWithEGP(min) : ""}</span>
         <span class="product-card-cta"><i class="fa-solid fa-arrow-left"></i></span>
       </div>
     </div>
@@ -183,7 +224,7 @@ function findProduct(key) {
   return PRODUCTS.find(p => p.key === key) || null;
 }
 
-const STEP_ORDER = ["detail", "payment", "customer", "invoice"];
+const STEP_ORDER = ["detail", "extras", "payment", "customer", "invoice"];
 
 function resolveVariantIndex(product, restore) {
   if (!restore) return 0;
@@ -226,6 +267,7 @@ function openFlow(key, restore) {
   validateCustomerFields();
 
   const step = (restore && restore.step) || "detail";
+  if (step === "extras") renderExtras();
   if (step === "payment" || step === "customer") renderPayment();
   if (step === "invoice" && restore.invoice) renderInvoice(restore.invoice);
 
@@ -249,25 +291,56 @@ function hideFlowOnly() {
   document.body.classList.remove("modal-open");
 }
 
-function showStep(step, silent) {
-  document.querySelectorAll(".flow-panel").forEach(p => p.classList.toggle("active", p.dataset.panel === step));
-  const stepIndex = STEP_ORDER.indexOf(step);
+function getActiveSteps() {
+  if (currentProduct && hasExtras(currentProduct, currentVariantIndex)) {
+    return ["detail", "extras", "payment", "customer", "invoice"];
+  }
+  return ["detail", "payment", "customer", "invoice"];
+}
+
+function updateStepDotsVisibility() {
+  const activeSteps = getActiveSteps();
+  const extrasDot = document.querySelector('.flow-step-dot[data-step="extras"]');
+  if (extrasDot) {
+    extrasDot.style.display = activeSteps.includes("extras") ? "" : "none";
+  }
+  let num = 1;
   document.querySelectorAll(".flow-step-dot").forEach(d => {
-    const dotIndex = STEP_ORDER.indexOf(d.dataset.step);
+    if (activeSteps.includes(d.dataset.step)) {
+      const numEl = d.querySelector(".flow-step-num");
+      if (numEl) numEl.textContent = num++;
+    }
+  });
+  const payBackBtn = document.querySelector('.flow-panel[data-panel="payment"] [data-back]');
+  if (payBackBtn) {
+    payBackBtn.dataset.back = activeSteps.includes("extras") ? "extras" : "detail";
+  }
+}
+
+function showStep(step, silent) {
+  const activeSteps = getActiveSteps();
+  if (!activeSteps.includes(step)) {
+    step = step === "extras" ? "payment" : "detail";
+  }
+  updateStepDotsVisibility();
+  document.querySelectorAll(".flow-panel").forEach(p => p.classList.toggle("active", p.dataset.panel === step));
+  const stepIndex = activeSteps.indexOf(step);
+  document.querySelectorAll(".flow-step-dot").forEach(d => {
+    if (!activeSteps.includes(d.dataset.step)) {
+      d.classList.remove("active", "done");
+      return;
+    }
+    const dotIndex = activeSteps.indexOf(d.dataset.step);
     d.classList.toggle("active", dotIndex === stepIndex);
     d.classList.toggle("done", dotIndex < stepIndex);
   });
   const fill = document.getElementById("flow-steps-fill");
-  if (fill) fill.style.width = stepIndex <= 0 ? "0%" : `${(stepIndex / (STEP_ORDER.length - 1)) * 100}%`;
+  if (fill) fill.style.width = stepIndex <= 0 ? "0%" : `${(stepIndex / (activeSteps.length - 1)) * 100}%`;
   const panel = document.querySelector(".flow-panel.active .panel-scroll, .flow-panel.active .detail-body");
   if (panel) panel.scrollTop = 0;
   if (!silent) persistState();
 }
 
-function youtubeEmbedUrl(url) {
-  const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
-}
 
 function renderDetail() {
   const meta = getProductMeta(currentProduct.key);
@@ -291,7 +364,7 @@ function renderDetail() {
     row.innerHTML = `
       <span class="variant-option-name">${escapeHtml(variant.name)}</span>
       <span class="variant-option-price">
-        ${showOld ? `<span class="variant-option-old">${formatEGP(oldNum)}</span>` : ""}
+        ${showOld ? `<span class="variant-option-old">${formatUSD(oldNum)}</span>` : ""}
         <span class="variant-option-new">${priceLabel(variant)}</span>
       </span>
     `;
@@ -322,36 +395,186 @@ function renderDetail() {
     infoWrap.appendChild(block);
   });
 
-  const extra = document.getElementById("lovable-extra");
-  extra.innerHTML = "";
-  const variant = currentProduct.variants[currentVariantIndex];
-  if (variant.EX_url) {
-    const a = document.createElement("a");
-    a.href = variant.EX_url;
-    a.target = "_blank";
-    a.rel = "noopener";
-    a.innerHTML = `<i class="fa-solid fa-download"></i> تحميل الإضافة`;
-    extra.appendChild(a);
+  const selectedVariant = currentVariant();
+  document.getElementById("detail-price").innerHTML = priceLabel(selectedVariant);
+
+  const btn = document.getElementById("to-payment-btn");
+  if (btn) {
+    if (hasExtras(currentProduct, currentVariantIndex)) {
+      btn.innerHTML = `متابعة وتحميل الإضافة <i class="fa-solid fa-arrow-left"></i>`;
+    } else {
+      btn.innerHTML = `اطلب الباقة دي <i class="fa-solid fa-arrow-left"></i>`;
+    }
   }
-  if (variant.vid_url) {
-    const btn = document.createElement("button");
-    btn.innerHTML = `<i class="fa-solid fa-play"></i> شغل الفيديو`;
-    const videoWrap = document.createElement("div");
-    videoWrap.className = "lovable-video";
-    const ytUrl = youtubeEmbedUrl(variant.vid_url);
-    videoWrap.innerHTML = ytUrl
-      ? `<iframe src="${ytUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0;display:block;"></iframe>`
-      : `<video controls src="${variant.vid_url}"></video>`;
-    btn.addEventListener("click", () => videoWrap.classList.toggle("open"));
-    extra.appendChild(btn);
-    extra.appendChild(videoWrap);
+}
+
+function hasExtras(product, variantIndex) {
+  const v = product.variants[variantIndex];
+  return !!(v.EX_url || v.vid_url);
+}
+
+function renderExtras() {
+  const container = document.getElementById("extras-content");
+  container.innerHTML = "";
+  const variant = currentProduct.variants[currentVariantIndex];
+
+  if (variant.EX_url) {
+    const downloadBlock = document.createElement("div");
+    downloadBlock.className = "extras-block";
+    downloadBlock.innerHTML = `
+      <div class="extras-block-icon"><i class="fa-solid fa-download"></i></div>
+      <div class="extras-block-info">
+        <div class="extras-block-label">تحميل الإضافة</div>
+        <div class="extras-block-hint">حمّل الإضافة المطلوبة عشان تقدر تستخدم الباقة</div>
+      </div>
+      <a href="${variant.EX_url}" target="_blank" rel="noopener" class="extras-download-btn"><i class="fa-solid fa-arrow-down"></i> تحميل</a>
+    `;
+    container.appendChild(downloadBlock);
   }
 
-  document.getElementById("detail-price").textContent = priceLabel(variant);
+  if (variant.vid_url) {
+    const videoBlock = document.createElement("div");
+    videoBlock.className = "extras-block extras-video-block";
+    const ytMatch = String(variant.vid_url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+    if (ytMatch) {
+      videoBlock.innerHTML = `
+        <div class="extras-block-icon"><i class="fa-solid fa-play"></i></div>
+        <div class="extras-block-info">
+          <div class="extras-block-label">فيديو الشرح</div>
+          <div class="extras-block-hint">شاهد الفيديو عشان تعرف طريقة الاستخدام</div>
+        </div>
+      `;
+      const playerWrap = document.createElement("div");
+      playerWrap.className = "mc-player";
+      const thumb = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+      playerWrap.innerHTML = `
+        <div class="mc-player-poster" id="mc-poster">
+          <img src="${thumb}" alt="video thumbnail">
+          <button class="mc-player-play-btn" id="mc-play-btn"><i class="fa-solid fa-play"></i></button>
+        </div>
+        <div class="mc-player-frame" id="mc-frame" style="display:none;"></div>
+      `;
+      videoBlock.appendChild(playerWrap);
+      container.appendChild(videoBlock);
+      document.getElementById("mc-play-btn").addEventListener("click", function() {
+        document.getElementById("mc-poster").style.display = "none";
+        const frame = document.getElementById("mc-frame");
+        frame.style.display = "block";
+        frame.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      });
+    } else {
+      videoBlock.innerHTML = `
+        <div class="extras-block-icon"><i class="fa-solid fa-play"></i></div>
+        <div class="extras-block-info">
+          <div class="extras-block-label">فيديو الشرح</div>
+          <div class="extras-block-hint">شاهد الفيديو عشان تعرف طريقة الاستخدام</div>
+        </div>
+      `;
+      const playerWrap = document.createElement("div");
+      playerWrap.className = "mc-player";
+      playerWrap.innerHTML = `
+        <div class="mc-player-video-wrap">
+          <video class="mc-player-video" id="mc-custom-video" preload="metadata" playsinline>
+            <source src="${variant.vid_url}" type="video/mp4">
+          </video>
+          <button class="mc-player-big-play" id="mc-big-play" aria-label="تشغيل"><i class="fa-solid fa-play"></i></button>
+        </div>
+        <div class="mc-player-controls" id="mc-controls">
+          <button class="mc-ctrl-btn" id="mc-pp" aria-label="تشغيل/إيقاف"><i class="fa-solid fa-play"></i></button>
+          <div class="mc-progress-wrap" id="mc-progress-wrap">
+            <div class="mc-progress-bar"><div class="mc-progress-fill" id="mc-progress-fill"></div></div>
+          </div>
+          <span class="mc-time" id="mc-time">0:00</span>
+          <button class="mc-ctrl-btn" id="mc-mute" aria-label="كتم الصوت"><i class="fa-solid fa-volume-high"></i></button>
+          <button class="mc-ctrl-btn" id="mc-fs" aria-label="ملء الشاشة"><i class="fa-solid fa-expand"></i></button>
+        </div>
+      `;
+      videoBlock.appendChild(playerWrap);
+      container.appendChild(videoBlock);
+      initCustomPlayer();
+    }
+  }
+
+  if (!variant.EX_url && !variant.vid_url) {
+    container.innerHTML = `<div class="extras-empty"><i class="fa-solid fa-circle-info"></i> مفيش إضافات أو فيديو لهذه الباقة</div>`;
+  }
+}
+
+function initCustomPlayer() {
+  const video = document.getElementById("mc-custom-video");
+  const ppBtn = document.getElementById("mc-pp");
+  const bigPlay = document.getElementById("mc-big-play");
+  const muteBtn = document.getElementById("mc-mute");
+  const progressWrap = document.getElementById("mc-progress-wrap");
+  const progressFill = document.getElementById("mc-progress-fill");
+  const timeEl = document.getElementById("mc-time");
+  const fsBtn = document.getElementById("mc-fs");
+
+  if (!video) return;
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ":" + (sec < 10 ? "0" : "") + sec;
+  }
+
+  function togglePlay() {
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  }
+
+  video.addEventListener("play", function() {
+    if (ppBtn) ppBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    if (bigPlay) bigPlay.classList.add("hidden");
+  });
+
+  video.addEventListener("pause", function() {
+    if (ppBtn) ppBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    if (bigPlay) bigPlay.classList.remove("hidden");
+  });
+
+  if (ppBtn) ppBtn.addEventListener("click", togglePlay);
+  if (bigPlay) bigPlay.addEventListener("click", togglePlay);
+
+  video.addEventListener("timeupdate", function() {
+    if (video.duration) {
+      progressFill.style.width = (video.currentTime / video.duration * 100) + "%";
+      timeEl.textContent = formatTime(video.currentTime);
+    }
+  });
+
+  video.addEventListener("ended", function() {
+    if (ppBtn) ppBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    if (bigPlay) bigPlay.classList.remove("hidden");
+  });
+
+  if (muteBtn) {
+    muteBtn.addEventListener("click", function() {
+      video.muted = !video.muted;
+      muteBtn.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+    });
+  }
+
+  progressWrap.addEventListener("click", function(e) {
+    const rect = progressWrap.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    video.currentTime = ratio * video.duration;
+  });
+
+  fsBtn.addEventListener("click", function() {
+    if (video.requestFullscreen) video.requestFullscreen();
+    else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
+  });
+
+  video.addEventListener("click", togglePlay);
 }
 
 function selectVariant(i) {
   currentVariantIndex = i;
+  updateStepDotsVisibility();
   renderDetail();
   persistState();
 }
@@ -386,12 +609,17 @@ function computeTotal() {
 function renderPayment() {
   const meta = getProductMeta(currentProduct.key);
   const variant = currentVariant();
+  const totals = computeTotal();
+  const egpAmount = convertUSDToEGP(totals.final);
   document.getElementById("order-summary").innerHTML = `
     <div class="order-summary-name">${escapeHtml(meta.title)}</div>
-    <div class="order-summary-plan">${escapeHtml(variant.name)}</div>
+    <div class="order-summary-plan">${escapeHtml(variant.name)} — <span class="order-summary-usd">${formatUSD(totals.final)}</span></div>
   `;
-  const totals = computeTotal();
-  document.getElementById("total-amount").textContent = formatEGP(totals.final);
+  const usdLabel = document.getElementById("total-usd-label");
+  if (usdLabel) {
+    usdLabel.textContent = `سعر الباقة: ${formatUSD(totals.final)} (سعر الصرف: 1$ = ${exchangeRate.toFixed(2)} ج.م)`;
+  }
+  document.getElementById("total-amount").innerHTML = `<span>${formatEGP(egpAmount)}</span>`;
   renderPayDetail();
 }
 
@@ -484,6 +712,8 @@ function buildInvoice() {
     couponCode: appliedCoupon ? String(appliedCoupon.code) : "",
     discountAmount: totals.discount,
     finalPrice: totals.final,
+    rateUsed: exchangeRate,
+    finalEgp: convertUSDToEGP(totals.final),
     backText: variant.back || ""
   };
 }
@@ -495,12 +725,17 @@ function renderInvoice(inv) {
   document.getElementById("invoice-product").textContent = `${inv.productTitle} — ${inv.variantName}`;
   document.getElementById("invoice-back").textContent = inv.backText;
 
+  const egp = inv.finalEgp !== undefined ? inv.finalEgp : convertUSDToEGP(inv.finalPrice);
+  const rate = inv.rateUsed !== undefined ? inv.rateUsed : exchangeRate;
+
   const table = document.getElementById("invoice-price-table");
-  let html = `<div class="invoice-price-line"><span>سعر الباقة</span><span>${formatEGP(inv.basePrice)}</span></div>`;
+  let html = `<div class="invoice-price-line"><span>سعر الباقة (بالدولار)</span><span>${formatUSD(inv.basePrice)}</span></div>`;
   if (inv.couponCode) {
-    html += `<div class="invoice-price-line"><span>كود الخصم (${escapeHtml(inv.couponCode)})</span><span>- ${formatEGP(inv.discountAmount)}</span></div>`;
+    html += `<div class="invoice-price-line"><span>كود الخصم (${escapeHtml(inv.couponCode)})</span><span>- ${formatUSD(inv.discountAmount)}</span></div>`;
   }
-  html += `<div class="invoice-price-line total"><span>الإجمالي</span><strong>${formatEGP(inv.finalPrice)}</strong></div>`;
+  html += `<div class="invoice-price-line"><span>سعر الصرف المعتمد</span><span>1$ = ${rate.toFixed(2)} ج.م</span></div>`;
+  html += `<div class="invoice-price-line"><span>إجمالي الباقة بالدولار</span><span>${formatUSD(inv.finalPrice)}</span></div>`;
+  html += `<div class="invoice-price-line total"><span>المبلغ المحول بالمصري</span><strong>${formatEGP(egp)}</strong></div>`;
   table.innerHTML = html;
 }
 
@@ -573,12 +808,22 @@ function bindEvents() {
   });
 
   document.getElementById("to-payment-btn").addEventListener("click", () => {
-    renderPayment();
-    showStep("payment");
+    if (hasExtras(currentProduct, currentVariantIndex)) {
+      renderExtras();
+      showStep("extras");
+    } else {
+      renderPayment();
+      showStep("payment");
+    }
   });
 
   document.querySelectorAll("[data-back]").forEach(btn => {
     btn.addEventListener("click", () => showStep(btn.dataset.back));
+  });
+
+  document.getElementById("to-payment-from-extras-btn").addEventListener("click", () => {
+    renderPayment();
+    showStep("payment");
   });
 
   document.getElementById("coupon-apply").addEventListener("click", () => {
@@ -663,7 +908,8 @@ function bindEvents() {
   document.getElementById("send-whatsapp-btn").addEventListener("click", () => {
     const inv = window.__lastInvoice;
     if (!inv) return;
-    const text = `مرحبًا، معايا فاتورة رقم ${inv.id}\nالباقة: ${inv.productTitle} - ${inv.variantName}\nالإجمالي: ${formatEGP(inv.finalPrice)}\nهبعتلك سكرين التحويل والفاتورة`;
+    const egp = inv.finalEgp !== undefined ? inv.finalEgp : convertUSDToEGP(inv.finalPrice);
+    const text = `مرحبًا، معايا فاتورة رقم ${inv.id}\nالباقة: ${inv.productTitle} - ${inv.variantName}\nالسعر: ${formatUSD(inv.finalPrice)} (المبلغ المحول: ${formatEGP(egp)})\nهبعتلك سكرين التحويل والفاتورة`;
     window.open(`https://wa.me/${PAYMENT_CONFIG.supportPhone}?text=${encodeURIComponent(text)}`, "_blank");
   });
 
@@ -677,25 +923,27 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   bindEvents();
   renderSkeleton(6);
-  fetch(DATA_URL)
-    .then(res => res.json())
-    .then(json => {
-      PRODUCTS = parseData(json);
-      renderCatalogStaggered();
-      restoreState();
-    })
-    .catch(() => {
-      document.getElementById("catalog-grid").innerHTML = "";
-      const status = document.getElementById("catalog-status");
-      status.classList.remove("hidden");
-      status.innerHTML = "<i class=\"fa-solid fa-circle-exclamation\"></i> تعذر تحميل الباقات، جرب تحدث الصفحة";
-    });
+  initCurrencyConverter().finally(() => {
+    fetch(DATA_URL)
+      .then(res => res.json())
+      .then(json => {
+        PRODUCTS = parseData(json);
+        renderCatalogStaggered();
+        restoreState();
+      })
+      .catch(() => {
+        document.getElementById("catalog-grid").innerHTML = "";
+        const status = document.getElementById("catalog-status");
+        status.classList.remove("hidden");
+        status.innerHTML = "<i class=\"fa-solid fa-circle-exclamation\"></i> تعذر تحميل الباقات، جرب تحدث الصفحة";
+      });
+  });
 });
 
 
 
 console.log(
-  '%c ⚙ VERSION %c V3.2.4 ',
+  '%c ⚙ VERSION %c V5.2.2 ',
   'background: #0f172a; color: #94a3b8; padding: 8px 12px; border-radius: 8px 0 0 8px; font-family: system-ui, sans-serif; font-weight: 600; font-size: 14px;',
   'background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); color: #ffffff; padding: 8px 16px; border-radius: 0 8px 8px 0; font-family: system-ui, sans-serif; font-weight: 800; font-size: 14px;'
 );
